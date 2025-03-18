@@ -7,7 +7,6 @@ from sqlalchemy.orm import mapped_column
 from sqlalchemy import String
 
 
-
 class StateClient(str, enum.Enum):
 	positive = "Высокий рейтинг"
 	default = "Обычный"
@@ -32,32 +31,56 @@ class Base(DeclarativeBase):
 	updated: Mapped[DateTime] = mapped_column(DateTime, default=func.now(), onupdate=func.now())
 
 
-class User(Base):
-	__tablename__ = "users"
-	
 
-	
-	id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-	tg_id: Mapped[int] = mapped_column(BigInteger, unique=True)
+class Kitchen(Base):
+	__tablename__ = "kitchens"
+
+	id: Mapped[int] = mapped_column(Integer, primary_key=True)
+	user_id: Mapped[int] = mapped_column(BigInteger, unique=True)
+	title: Mapped[str] = mapped_column(String(30))
+	description: Mapped[str] = mapped_column(Text)
+	number: Mapped[str] = mapped_column(String(20), unique=True)
+	cities: Mapped[list["City"]|None] = relationship(secondary="kitchen_city_association", back_populates='kitchens')
+
+class Client(Base):
+	__tablename__ = "clients"  # Исправлено на __tablename__
+
+	id: Mapped[int] = mapped_column(Integer, primary_key=True)
+	user_id: Mapped[int] = mapped_column(BigInteger, unique=True)
+	name: Mapped[str] = mapped_column(String(30))
+	lastname: Mapped[str] = mapped_column(String(30))  # Убедитесь, что тип указан
+	address: Mapped[str | None] = mapped_column(String(150))
+	orders: Mapped[list["Order"]] = relationship("Order", back_populates="client", cascade="all, delete-orphan")
+	state: Mapped[StateClient] = mapped_column(default=StateClient.default)  # Убедитесь, что StateClient определен
+	number: Mapped[str | None] = mapped_column(String(20), unique=True)
+
+	 
+
+class Admin(Base):
+	__tablename__  = "admins"
+
+	id: Mapped[int] = mapped_column(Integer, primary_key=True)
+	user_id: Mapped[int] = mapped_column(BigInteger, unique=True)
 	name: Mapped[str] = mapped_column(String(30)) 
 	lastname: Mapped[str]
-	number: Mapped[str] = mapped_column(String(20), unique=True) 
-	type: Mapped[str] = mapped_column(String(50))  
+	number: Mapped[str|None] = mapped_column(String(20), unique=True) 
+ 
 
+class Courier(Base):
+	__tablename__  = "couriers"
 
-	__mapper_args__ = {
-        'polymorphic_identity': 'user',
-		'polymorphic_on': 'type',
-		'with_polymorphic': '*',
-    }
+	id: Mapped[int] = mapped_column(Integer, primary_key=True)
+	user_id: Mapped[int] = mapped_column(BigInteger, unique=True)
+	name: Mapped[str] = mapped_column(String(30)) 
+	lastname: Mapped[str]
+	number: Mapped[str|None] = mapped_column(String(20), unique=True)
 
-	
 
 class Product(Base):
 	__tablename__ = "products"
 	
 	id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-	owned_id: Mapped[int] = mapped_column(ForeignKey('citchens.id'))
+	owned_id: Mapped[int] = mapped_column(ForeignKey('kitchens.id'))
 	name: Mapped[str] = mapped_column(String(30))
 	description: Mapped[str] = mapped_column(Text)
 	price: Mapped[float] = mapped_column(Float(asdecimal=True), nullable=False)
@@ -68,79 +91,40 @@ class Product(Base):
 		)
 
 
-class Citchen(User):
-	__tablename__  = "citchens"
-	id: Mapped[int] = mapped_column(None, ForeignKey('users.id'), primary_key=True)
-	title: Mapped[str] = mapped_column(String(30))
-	description: Mapped[str] = mapped_column(Text)
-	city: Mapped[int] = mapped_column(ForeignKey('cities.id'))
-
-	__mapper_args__ = {
-        'polymorphic_identity': 'citchen', 
-    }
-
-
-
-class Client(User):
-	__tablename__ = "clients"
-	# __mapper_args__ = {
-    #     'polymorphic_identity': 'client',
-    #     'inherit_condition': (id == User.id),  
-    # }
-	
-	id: Mapped[int] = mapped_column(None, ForeignKey('users.id'), primary_key=True)
-	adress: Mapped[str] = mapped_column(String(150))
-	orders: Mapped[list["Order"]] = relationship("Order", back_populates="client", cascade="all, delete-orphan")
-	state: Mapped[StateClient]
-
-	__mapper_args__ = {
-        'polymorphic_identity': 'client', 
-    }
-
-
-class Admin(User):
-	__tablename__  = "admins"
-	# __mapper_args__ = {
-    #     'polymorphic_identity': 'admin',
-    #     'inherit_condition': (id == User.id),  
-    # }
-	id: Mapped[int] = mapped_column(None, ForeignKey('users.id'), primary_key=True)
-
-	__mapper_args__ = {
-        'polymorphic_identity': 'admin', 
-    }
-
-
-class Courier(User):
-	__tablename__  = "couirers"
-	# __mapper_args__ = {
-    #     'polymorphic_identity': 'couirer',
-    #     'inherit_condition': (id == User.id),  
-    # }
-	id: Mapped[int] = mapped_column(None, ForeignKey('users.id'), primary_key=True)
-	
-	__mapper_args__ = {
-        'polymorphic_identity': 'courier', 
-    }
-
-
-
-
 class Order(Base):
 	__tablename__  = "orders"
 
 	id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 	state_order: Mapped[StateOrder]
+	client_id: Mapped[int] = mapped_column(ForeignKey("clients.id"))  # Добавляем внешний ключ
+	client: Mapped["Client"] = relationship("Client", back_populates="orders")  # Исправлено на orders
 	products: Mapped[list["Product"]] = relationship(
-		secondary="order_product_association", 
+		secondary="order_product_association",
 		back_populates="orders",
-		)
+	)
+	delivery_time: Mapped[DateTime] = mapped_column(DateTime, default=func.now())
+
 
 class City(Base):
 	__tablename__ = "cities"
 
 	id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 	tittle: Mapped[str]
+	kitchens: Mapped[list["Kitchen"]] = relationship(secondary="kitchen_city_association", back_populates="cities")
+
+
+class KitchenCityAssociation(Base):
+	__tablename__ = "kitchen_city_association"
+	__table_args__ = (
+		UniqueConstraint(
+			"kitchen_id",
+			"city_id",
+			name = "idx_unique_order_product"
+		),
+	)
+	id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+	kitchen_id: Mapped[int] = mapped_column(ForeignKey('kitchens.id'))
+	city_id: Mapped[int] = mapped_column(ForeignKey('cities.id'))
 
 
 class OrderProductAssociation(Base):
@@ -149,7 +133,7 @@ class OrderProductAssociation(Base):
 		UniqueConstraint(
 			"order_id",
 			"product_id",
-			name = "idx_unique_order_product"
+			name = "idx_unique_kitchen_city"
 		),
 	)
 	id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
