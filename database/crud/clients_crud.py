@@ -29,7 +29,7 @@ async def create_client(session, data: dict, tg_id: int) -> Optional[Client]:
             logger.info(f"Профиль с ID {tg_id} найден!")
     except SQLAlchemyError as e:
         logger.error(f"Ошибка при добавлении пользователя: {e}")
-        await session.rollback()
+        # await session.rollback()
 
 @connection
 async def get_client(session, tg_id: int):

@@ -10,19 +10,19 @@ from database.engine import connection
 @connection
 async def create_city(session, data: dict):
     try:
-        city = await session.scalar(select(City).where(City.tittle == data['tittle']))
+        city = await session.scalar(select(City).where(City.title == data['title']))
         if not city:
             new_city = City(
-                tittle = data['tittle']
+                title = data['title']
             )
             session.add(new_city)
             await session.commit()
-            logger.info(f"{data['tittle']} Успешно добавлен в базу данных")
+            logger.info(f"{data['title']} Успешно добавлен в базу данных")
         else:
-            logger.info(f"{data['tittle']} уже есть в базе данных!")
+            logger.info(f"{data['title']} уже есть в базе данных!")
     except SQLAlchemyError as e:
         logger.error(f"Ошибка при добавлении города: {e}")
-        await session.rollback()
+        # await session.rollback()
 
 @connection
 async def get_city(session):
@@ -33,7 +33,7 @@ async def get_city(session):
         logger.info("В базе данных пока еще нет городов")
     except SQLAlchemyError as e:
         logger.error(f"Ошибка при поиске города: {e}")
-        await session.rollback()
+        # await session.rollback()
 
 @connection
 async def get_one_city(session, id:int):
@@ -44,7 +44,7 @@ async def get_one_city(session, id:int):
         logger.info("В базе данных пока еще нет городов")
     except SQLAlchemyError as e:
         logger.error(f"Ошибка при поиске города: {e}")
-        await session.rollback()
+        # await session.rollback()
 
 
 
@@ -53,13 +53,13 @@ async def update_city(session, data: dict):
     try:
         city = await session.scalar(select(City).where(City.id == data['id']))
         if city:
-            city.tittle = data['tittle']
+            city.title = data['tittle']
             await session.commit()
             logger.info(f"Город {id} успешно обновлен")
         logger.info(f"Города под номер {id} еще нет в базе данных")
     except SQLAlchemyError as e:
         logger.error(f"Ошибка при обновлении города: {e}")
-        await session.rollback()
+        # await session.rollback()
 
 
 @connection
@@ -73,4 +73,4 @@ async def delete_city(session, data: dict):
         logger.info(f"Города под номер {id} еще нет в базе данных")
     except SQLAlchemyError as e:
         logger.error(f"Ошибка при удалении города: {e}")
-        await session.rollback()
+        # await session.rollback()

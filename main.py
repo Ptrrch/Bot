@@ -1,14 +1,14 @@
 import asyncio
 import logging
-from contextlib import asynccontextmanager
+
 
 from aiogram import Bot
 from aiogram import Dispatcher
 
-from database.crud.kitchens_crud import test
+from database.crud.couriers_crud import test_courier
+from database.crud.kitchens_crud import delete_kitchen, test
 from database.models import Base
-from database.engine import engine
- 
+from database.engine import engine, drop_db
 
 from config import BOT_TOKEN
 from routers import router as main_router
@@ -26,8 +26,9 @@ async def create_db():
 
 
 async def main():
+    await drop_db()
     await create_db()
-    await test()
+    await test_courier()
 
     logging.basicConfig(level=logging.INFO)
     await dp.start_polling(bot)
