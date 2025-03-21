@@ -27,17 +27,14 @@ async def create_kitchen(session, data: dict) -> None:
 @connection
 async def append_city_to_kitchen(session, tg_id: int, city_id: int) -> None:
     try:
-        kitchen = await session.scalar(
-            select(Kitchen)
-            .options(selectinload(Kitchen.cities))
-            .where(Kitchen.user_id == tg_id)
+        city = await session.scalar(
+            select(City)
+            .options(selectinload(City.kitchens))
+            .where(City.id == city_id)
         )
-        city = await session.scalar(select(City).where(City.id == city_id))
-        if city.id not in [c.id for c in kitchen.cities]:
-            kitchen.cities.append(city)
+        kitchen = await session.scalar(select(Kitchen).where(Kitchen.id == tg_id))
+        city.kitchens.append(kitchen)
 
-        else:
-            print("Город уже назначен этому заведению")
 
         await session.commit()
     except Exception as e:
@@ -57,6 +54,8 @@ async def get_kitchen(session, id: int) -> Kitchen | None:
 
 
 async def test() -> None:
+    # await create_kitchen({'tg_id': 1, 'title': "title", 'description': "description", 'number': "number"})
+    # await append_city_to_kitchen(1, 1)
     pass
 
 

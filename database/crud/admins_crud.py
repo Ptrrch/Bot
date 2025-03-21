@@ -22,7 +22,7 @@ async def create_admin(session, data: dict, tg_id: int):
             logger.info(f"Профиль с ID {tg_id} найден!")
     except SQLAlchemyError as e:
         logger.error(f"Ошибка при добавлении пользователя: {e}")
-        # await session.rollback()
+        await session.rollback()
 
 
 @connection
@@ -34,7 +34,7 @@ async def get_admin(session, tg_id: int):
         logger.info(f"Администратор с ID {tg_id} не найден!")
     except SQLAlchemyError as e:
         logger.error(f"Ошибка при поиске администратора: {e}")
-        # await session.rollback()
+        await session.rollback()
 
 
 @connection
@@ -50,7 +50,7 @@ async def update_admin(session, data: dict, tg_id: int):
             logger.info(f"Администратор с ID {tg_id} не найден!")
     except SQLAlchemyError as e:
         logger.error(f"Ошибка при изменении администратора с ID {tg_id}: {e}")
-        # await session.rollback()
+        await session.rollback()
 
 
 @connection
@@ -66,6 +66,6 @@ async def delete_admin(session, tg_id: int):
             logger.info(f"Администратор с ID {tg_id} не найден!")
     except SQLAlchemyError as e:
         logger.error(f"Ошибка при удалении администратора с ID {tg_id}: {e}")
-        # await session.rollback()
+        await session.rollback()
 
 

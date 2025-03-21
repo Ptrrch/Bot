@@ -46,8 +46,8 @@ async def append_courier_to_city(session, tg_id: int, city_id: int) -> None:
 
     city.couriers.append(courier)
     await session.commit()
-@connection
-async def test_courier(session):
-    await create_city({'title':"Moscow"})
-    await create_courier({'tg_id': 1, 'name': "name", 'lastname': "lastname", 'number': "number"})
-    await append_courier_to_city(city_id=1, tg_id=1)
+
+
+# @connection
+# async def
+

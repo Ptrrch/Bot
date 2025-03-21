@@ -27,8 +27,8 @@ class StateOrder(str, enum.Enum):
 
 class Base(DeclarativeBase):
 
-    created: Mapped[DateTime] = mapped_column(DateTime, default=func.now())
-    updated: Mapped[DateTime] = mapped_column(DateTime, default=func.now(), onupdate=func.now())
+    created: Mapped[DateTime] = mapped_column(DateTime, default=func.now(), server_default=func.now())
+    updated: Mapped[DateTime] = mapped_column(DateTime, default=func.now(), server_default=func.now(), onupdate=func.now())
 
 
 
@@ -40,11 +40,8 @@ class Kitchen(Base):
     title: Mapped[str] = mapped_column(String(30))
     description: Mapped[str] = mapped_column(Text)
     number: Mapped[str] = mapped_column(String(20), unique=True)
-    cities: Mapped[list["City"] | None] = relationship(
-        secondary="kitchen_city_association",
-        back_populates='kitchens'
-
-    )
+    cities_id: Mapped[int] = mapped_column(ForeignKey('cities.id'), nullable=True)
+    cities: Mapped["City"] = relationship(back_populates='kitchens')
 
 
 class City(Base):
@@ -53,22 +50,10 @@ class City(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     title: Mapped[str] = mapped_column(String(50))
 
-    kitchens: Mapped[list["Kitchen"]] = relationship(
-        secondary="kitchen_city_association",
-        back_populates="cities",
-    )
-
+    kitchens: Mapped[list["Kitchen"]] = relationship(back_populates="cities")
     couriers: Mapped[list["Courier"]] = relationship("Courier", back_populates="cities")
 
 
-class KitchenCityAssociation(Base):
-    __tablename__ = "kitchen_city_association"
-    __table_args__ = (
-        UniqueConstraint("kitchen_id", "city_id", name="idx_unique_order_product"),
-    )
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    kitchen_id: Mapped[int] = mapped_column(ForeignKey('kitchens.id'))
-    city_id: Mapped[int] = mapped_column(ForeignKey('cities.id'))
 
 class Client(Base):
     __tablename__ = "clients"
@@ -111,29 +96,34 @@ class Product(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     owned_id: Mapped[int] = mapped_column(ForeignKey('kitchens.id'))
-    name: Mapped[str] = mapped_column(String(30))
+    title: Mapped[str] = mapped_column(String(30))
     description: Mapped[str] = mapped_column(Text)
-    price: Mapped[float] = mapped_column(Float(asdecimal=True), nullable=False)
-    img: Mapped[str] = mapped_column(String(150))
-    orders: Mapped[list["Order"]] = relationship(
-        secondary="order_product_association",
-        back_populates="products",
-        )
+    price: Mapped[int] = mapped_column(Integer, nullable=False)
+    # img: Mapped[str] = mapped_column(String(150))
+    # orders: Mapped[list["Order"]] = relationship(
+    #     secondary="order_product_association",
+    #     back_populates="products",
+    #     )
+    orders_details: Mapped[list["OrderProductAssociation"]] = relationship(
+        back_populates="product"
+    )
 
 
 class Order(Base):
     __tablename__  = "orders"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    state_order: Mapped[StateOrder]
-    client_id: Mapped[int] = mapped_column(ForeignKey("clients.id"))  # Добавляем внешний ключ
-    client: Mapped["Client"] = relationship("Client", back_populates="orders")  # Исправлено на orders
-    products: Mapped[list["Product"]] = relationship(
-        secondary="order_product_association",
-        back_populates="orders",
-    )
+    state_order: Mapped[StateOrder] = mapped_column(default=StateOrder.inTheReview)
+    client_id: Mapped[int] = mapped_column(ForeignKey("clients.id"), nullable=True)
+    client: Mapped["Client"] = relationship("Client", back_populates="orders")
     delivery_time: Mapped[DateTime] = mapped_column(DateTime, default=func.now())
-
+    # products: Mapped[list["Product"]] = relationship(
+    #     secondary="order_product_association",
+    #     back_populates="orders",
+    # )
+    products_details: Mapped[list["OrderProductAssociation"]] = relationship(
+        back_populates="order"
+    )
 
 class OrderProductAssociation(Base):
     __tablename__ = "order_product_association"
@@ -149,3 +139,9 @@ class OrderProductAssociation(Base):
     product_id: Mapped[int] = mapped_column(ForeignKey('products.id'))
     count: Mapped[int] = mapped_column(default=1, server_default="1")
 
+    order: Mapped["Order"] = relationship(
+        back_populates="products_details"
+    )
+    product: Mapped["Product"] = relationship(
+        back_populates="orders_details"
+    )
