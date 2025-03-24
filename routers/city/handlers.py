@@ -21,29 +21,29 @@ async def send_city_result(data: dict):
 @router.callback_query(F.data.startswith('create_new_city'))
 @router.message(Command("create_city", prefix="!/"))
 async def create_city_message(message: types.Message, state: FSMContext):
-    await state.set_state(City.tittle)
+    await state.set_state(City.title)
     await message.answer("Введите название города")
 
 
-@router.message(City.tittle, F.text)
+@router.message(City.title, F.text)
 async def create_city_title(message:types.Message, state: FSMContext):
-    data = await state.update_data(tittle = message.text)
-    await message.answer(f"{data['tittle']} успешно добавлен")
+    data = await state.update_data(title = message.text)
+    await message.answer(f"{data['title']} успешно добавлен")
     await send_city_result(data)
 
 @router.callback_query(F.data.startswith('change_city_'))
-async def cmd_start(call: CallbackQuery, state: FSMContext):
+async def update_city(call: CallbackQuery, state: FSMContext):
     await call.answer()
     await state.set_state(ChangeCity.id)
     city_id = int(call.data.replace('change_city_', ''))
     await state.update_data(id = city_id)
-    await state.set_state(ChangeCity.tittle)
+    await state.set_state(ChangeCity.title)
 
 
-@router.message(ChangeCity.tittle, F.text)
+@router.message(ChangeCity.title, F.text)
 async def create_city_title(message:types.Message, state: FSMContext):
-    data = await state.update_data(tittle = message.text)
+    data = await state.update_data(title = message.text)
     await state.clear()
     await update_city(data)
-    await message.answer(f"{data['tittle']} успешно изменен")
+    await message.answer(f"{data['title']} успешно изменен")
 

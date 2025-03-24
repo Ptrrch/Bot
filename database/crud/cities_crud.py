@@ -25,26 +25,28 @@ async def create_city(session, data: dict):
         # await session.rollback()
 
 @connection
-async def get_city(session):
+async def get_city(session) -> City|None:
     try:
         city = await session.scalars(select(City))
-        return city
-
-        logger.info("В базе данных пока еще нет городов")
+        if city:
+            return city
+        else:
+            logger.info("В базе данных пока еще нет городов")
     except SQLAlchemyError as e:
         logger.error(f"Ошибка при поиске города: {e}")
-        # await session.rollback()
+        await session.rollback()
 
 @connection
 async def get_one_city(session, id:int):
     try:
         city = await session.scalar(select(City).where(City.id == id))
-        return city
-
-        logger.info("В базе данных пока еще нет городов")
+        if city:
+            return city
+        else:
+            logger.info("В базе данных пока еще нет городов")
     except SQLAlchemyError as e:
         logger.error(f"Ошибка при поиске города: {e}")
-        # await session.rollback()
+        await session.rollback()
 
 
 
@@ -53,13 +55,14 @@ async def update_city(session, data: dict):
     try:
         city = await session.scalar(select(City).where(City.id == data['id']))
         if city:
-            city.title = data['tittle']
+            city.title = data['title']
             await session.commit()
             logger.info(f"Город {id} успешно обновлен")
-        logger.info(f"Города под номер {id} еще нет в базе данных")
+        else:
+            logger.info(f"Города под номер {id} еще нет в базе данных")
     except SQLAlchemyError as e:
         logger.error(f"Ошибка при обновлении города: {e}")
-        # await session.rollback()
+        await session.rollback()
 
 
 @connection
@@ -70,7 +73,8 @@ async def delete_city(session, data: dict):
             await session.delete(city)
             await session.commit()
             logger.info(f"Город {id} успешно удален")
-        logger.info(f"Города под номер {id} еще нет в базе данных")
+        else:
+            logger.info(f"Города под номер {id} еще нет в базе данных")
     except SQLAlchemyError as e:
         logger.error(f"Ошибка при удалении города: {e}")
-        # await session.rollback()
+        await session.rollback()

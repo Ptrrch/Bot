@@ -5,11 +5,8 @@ from aiogram.filters import CommandStart, Command
 from aiogram.types import CallbackQuery, InlineKeyboardMarkup
 
 from Keyboards.City_kb import create_city_keyboard, city_change_keyboard
-from database.crud.admins_crud import get_admin, delete_admin
 from database.crud.cities_crud import get_city, get_one_city, delete_city
-from database.crud.clients_crud import get_client
-from routers.city.handlers import create_city_message
-from routers.city.states import City
+
 
 router = Router(name=__name__)
 
@@ -21,18 +18,18 @@ async def get_city_table(message: types.Message) ->None:
 
 
 @router.callback_query(F.data.startswith('refresh_city'))
-async def cmd_start(call: CallbackQuery):
+async def refresh_city_table(call: CallbackQuery):
     await call.answer()
     data = await get_city()
     await call.message.answer("Вот новая клавиатура", reply_markup=create_city_keyboard(data))
 
 
 @router.callback_query(F.data.startswith('get_city_item_'))
-async def cmd_start(call: CallbackQuery):
+async def get_item_with_city_table(call: CallbackQuery):
     await call.answer()
     city_id = int(call.data.replace('get_city_item_', ''))
     data = await get_one_city(city_id)
-    text = data.tittle
+    text = data.title
     await call.message.answer(text, reply_markup=city_change_keyboard(city_id))
 
 
@@ -40,7 +37,7 @@ async def cmd_start(call: CallbackQuery):
 
 
 @router.callback_query(F.data.startswith('delete_city_'))
-async def cmd_start(call: CallbackQuery):
+async def delete_city_from_city_table(call: CallbackQuery):
     await call.answer()
     city_id = int(call.data.replace('delete_city_', ''))
     data = {}

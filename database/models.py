@@ -61,11 +61,11 @@ class Client(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(BigInteger, unique=True)
     name: Mapped[str] = mapped_column(String(30))
-    lastname: Mapped[str] = mapped_column(String(30))  # Убедитесь, что тип указан
-    address: Mapped[str | None] = mapped_column(String(150))
+    lastname: Mapped[str] = mapped_column(String(30)) 
+    address: Mapped[str|None] = mapped_column(String(150))
     orders: Mapped[list["Order"]] = relationship("Order", back_populates="client", cascade="all, delete-orphan")
-    state: Mapped[StateClient] = mapped_column(default=StateClient.default)  # Убедитесь, что StateClient определен
-    number: Mapped[str | None] = mapped_column(String(20), unique=True)
+    state: Mapped[StateClient] = mapped_column(default=StateClient.default)
+    number: Mapped[str|None] = mapped_column(String(20), unique=True)
 
 
 
@@ -95,15 +95,11 @@ class Product(Base):
     __tablename__ = "products"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    owned_id: Mapped[int] = mapped_column(ForeignKey('kitchens.id'))
+    owned_id: Mapped[int|None] = mapped_column(ForeignKey('kitchens.id'))
     title: Mapped[str] = mapped_column(String(30))
     description: Mapped[str] = mapped_column(Text)
     price: Mapped[int] = mapped_column(Integer, nullable=False)
-    # img: Mapped[str] = mapped_column(String(150))
-    # orders: Mapped[list["Order"]] = relationship(
-    #     secondary="order_product_association",
-    #     back_populates="products",
-    #     )
+    img: Mapped[str] = mapped_column(String(150))
     orders_details: Mapped[list["OrderProductAssociation"]] = relationship(
         back_populates="product"
     )
