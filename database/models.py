@@ -41,7 +41,7 @@ class Kitchen(Base):
     description: Mapped[str] = mapped_column(Text)
     number: Mapped[str] = mapped_column(String(20), unique=True)
     address: Mapped[str] = mapped_column(String(30))
-    cities_id: Mapped[int] = mapped_column(ForeignKey('cities.id'), nullable=True)
+    city_id: Mapped[int] = mapped_column(ForeignKey('cities.id'), nullable=True)
     cities: Mapped["City"] = relationship(back_populates='kitchens')
 
 
@@ -52,7 +52,7 @@ class City(Base):
     title: Mapped[str] = mapped_column(String(50))
 
     kitchens: Mapped[list["Kitchen"]] = relationship(back_populates="cities")
-    couriers: Mapped[list["Courier"]] = relationship("Courier", back_populates="cities")
+    couriers: Mapped[list["Courier"]] = relationship(back_populates="cities")
 
 
 
@@ -88,7 +88,7 @@ class Courier(Base):
     name: Mapped[str] = mapped_column(String(30))
     lastname: Mapped[str]
     number: Mapped[str|None] = mapped_column(String(20), unique=True)
-    cities_id: Mapped[int] = mapped_column(Integer, ForeignKey('cities.id'), nullable=True)
+    city_id: Mapped[int] = mapped_column(Integer, ForeignKey('cities.id'), nullable=True)
     cities: Mapped["City"] = relationship( "City", back_populates="couriers")
 
 

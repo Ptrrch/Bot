@@ -6,4 +6,4 @@ class Kitchen(StatesGroup):
     description = State()
     number = State()
     address = State()
-    cities_id = State()
+    city_id = State()

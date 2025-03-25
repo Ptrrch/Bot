@@ -5,12 +5,13 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 def create_city_keyboard(data: dict) ->InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
-    for item in data:
-        builder.row(InlineKeyboardButton(
-            text=item.title,
-            callback_data=f"get_city_item_{item.id}"
+    if data is not None:
+        for item in data:
+            builder.row(InlineKeyboardButton(
+                text=item.title,
+                callback_data=f"get_city_item_{item.id}"
+                )
             )
-        )
     builder.row(
         InlineKeyboardButton(
             text='➕ Добавить город',

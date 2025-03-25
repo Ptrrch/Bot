@@ -17,7 +17,7 @@ router = Router(name=__name__)
 
 
 async def send_kitchen_result(message: types.Message, data: dict):
-    city = await get_one_city(data['cities_id'])
+    city = await get_one_city(data['city_id'])
     text = markdown.text(
         "Так выглядит профиль вашего заведения:",
         "",
@@ -57,7 +57,7 @@ async def handle_kitchen_title_invalid_content_type(message: types.Message):
 @router.message(Kitchen.description, F.text)
 async def handle_kitchen_description(message: types.Message, state: FSMContext):
     await state.update_data(description=message.text)
-    await state.set_state(Kitchen.cities_id)
+    await state.set_state(Kitchen.city_id)
     city = await get_city()
     await message.answer("Выберите город", reply_markup=create_city_for_kitchen_keyboard(city))
     
@@ -69,17 +69,17 @@ async def handle_kittchen_description_invalid_content_type(message: types.Messag
     )
 
 
-@router.callback_query(Kitchen.cities_id, F.data.startswith('add_city_for_kitchen_'))
+@router.callback_query(Kitchen.city_id, F.data.startswith('add_city_for_kitchen_'))
 async def handle_kitchen_city_id(call: CallbackQuery, state: FSMContext):
     await call.answer()
-    city_id = int(call.data.replace('add_city_for_kitchen_', ''))
-    await state.update_data(cities_id = city_id)
+    id = int(call.data.replace('add_city_for_kitchen_', ''))
+    await state.update_data(city_id = id)
     await state.set_state(Kitchen.address)
     await call.message.answer(
         "Укажите адрес вашего заведения"
     )
 
-@router.message(Kitchen.cities_id)
+@router.message(Kitchen.city_id)
 async def handle_kitchen_city_id_invalid_content_type(call: CallbackQuery, state: FSMContext):
     await call.answer()
     await call.message.answer("Выберите город из списка")

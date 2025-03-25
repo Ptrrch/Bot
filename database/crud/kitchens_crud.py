@@ -18,7 +18,7 @@ async def create_kitchen(session, data: dict, tg_id:int) -> None:
             description=data['description'],
             address=data['address'],
             number=data['number'],
-            cities_id=data['cities_id']
+            city_id=data['city_id']
         )
         session.add(kitchen)
         await session.commit()

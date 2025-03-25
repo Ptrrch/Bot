@@ -7,14 +7,15 @@ from database.models import Courier, City
 
 
 @connection
-async def create_courier(session, data: dict) -> None:
-    courier = await session.scalar(select(Courier).where(Courier.user_id == data['tg_id']))
+async def create_courier(session, data: dict, tg_id: int) -> None:
+    courier = await session.scalar(select(Courier).where(Courier.user_id == tg_id))
     if not courier:
         new_courier = Courier(
-            user_id = data['tg_id'],
+            user_id = tg_id,
             name = data['name'],
             lastname = data['lastname'],
             number = data['number'],
+            city_id = data['city_id']
         )
         session.add(new_courier)
         await session.commit()
