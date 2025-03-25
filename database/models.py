@@ -40,6 +40,7 @@ class Kitchen(Base):
     title: Mapped[str] = mapped_column(String(30))
     description: Mapped[str] = mapped_column(Text)
     number: Mapped[str] = mapped_column(String(20), unique=True)
+    address: Mapped[str] = mapped_column(String(30))
     cities_id: Mapped[int] = mapped_column(ForeignKey('cities.id'), nullable=True)
     cities: Mapped["City"] = relationship(back_populates='kitchens')
 

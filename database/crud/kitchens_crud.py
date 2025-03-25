@@ -9,14 +9,16 @@ from database.engine import connection
 from database.models import Kitchen, City
 #
 @connection
-async def create_kitchen(session, data: dict) -> None:
-    kitchen = await session.scalar(select(Kitchen).where(Kitchen.user_id == data['tg_id']))
+async def create_kitchen(session, data: dict, tg_id:int) -> None:
+    kitchen = await session.scalar(select(Kitchen).where(Kitchen.user_id == tg_id))
     if not kitchen:
         kitchen = Kitchen(
-            user_id=data['tg_id'],
+            user_id=tg_id,
             title=data['title'],
             description=data['description'],
-            number=data['number']
+            address=data['address'],
+            number=data['number'],
+            cities_id=data['cities_id']
         )
         session.add(kitchen)
         await session.commit()
@@ -63,9 +65,10 @@ async def test() -> None:
 async def update_kitchen(session, tg_id: id, data: dict) -> None:
     kitchen = await session.scalar(select(Kitchen).where(Kitchen.user_id == tg_id))
     if kitchen:
-        kitchen.user_id=data['tg_id'],
-        kitchen.title=data['title'],
-        kitchen.description=data['description'],
+        kitchen.user_id=data['tg_id']
+        kitchen.title=data['title']
+        kitchen.description=data['description']
+        kitchen.address=data['address']
         kitchen.number=data['number']
     await session.commit()
 

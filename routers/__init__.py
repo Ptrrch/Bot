@@ -7,6 +7,7 @@ from .client import router as client_router
 from .admin import router as admin_router
 from .city import router as city_router
 from .product import router as product_router
+from .kitchen import router as kitchen_router
 
 router = Router(name=__name__)
 
@@ -15,6 +16,7 @@ router.include_routers(
     client_router,
     admin_router,
     city_router,
-    product_router
+    product_router,
+    kitchen_router
 )
 

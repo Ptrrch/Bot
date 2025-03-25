@@ -30,6 +30,7 @@ async def create_city_title(message:types.Message, state: FSMContext):
     data = await state.update_data(title = message.text)
     await message.answer(f"{data['title']} успешно добавлен")
     await send_city_result(data)
+    await state.clear()
 
 @router.callback_query(F.data.startswith('change_city_'))
 async def update_city(call: CallbackQuery, state: FSMContext):
