@@ -1,6 +1,7 @@
 from aiogram import Router, types
 from aiogram.filters import CommandStart, Command
 
+from Keyboards.Base_kb import main_kb
 from database.crud.admins_crud import get_admin, delete_admin
 from database.crud.clients_crud import get_client
 
@@ -9,7 +10,7 @@ router = Router(name=__name__)
 
 @router.message(CommandStart())
 async def start_message(message: types.Message):
-    await message.answer(text="Holla, i'm demo-Bot")
+    await message.answer(text="Holla, i'm demo-Bot", reply_markup=main_kb())
 
 
 @router.message(Command("help", prefix="!/"))
@@ -55,4 +56,9 @@ async def get_admin_profile(message: types.Message):
         await message.answer(f"Админ номер {message.from_user.id} успешно удален")
     else:
         await message.answer("Админ не найден.")
+
+
+@router.message(Command('menu', prefix="!/"))
+async def list_of_establishments(message: types.Message):
+    ...
 

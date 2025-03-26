@@ -39,6 +39,16 @@ async def handle_start_kitchen(message: types.Message, state: FSMContext):
     await state.set_state(Kitchen.title)
     await message.answer(text="Укажите ваше название")
 
+@router.message(Command("cancel"))  # Сработает при команде /cancel
+@router.message(F.text.casefold() == "cancel") # И если в сообщение есть "cancel"
+async def cancel_handler(message: types.Message, state: FSMContext) -> None:
+    current_state = await state.get_state()  # Получаем текущий state
+    if current_state is None:  # Если его нет, то ничего не возвращаем
+        return
+    '''А вот иначе, завершаем state и прописываем в лог'''
+    await state.clear()
+    await message.answer(f"Вы отменили действие: {current_state}")
+
 
 @router.message(Kitchen.title, F.text)
 async def handle_kitchen_title(message: types.Message, state: FSMContext):

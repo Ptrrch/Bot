@@ -9,6 +9,7 @@ from .city import router as city_router
 from .product import router as product_router
 from .kitchen import router as kitchen_router
 from .courier import router as courier_router
+from .callback_handlers import router as callback_router
 
 router = Router(name=__name__)
 
@@ -19,6 +20,7 @@ router.include_routers(
     city_router,
     product_router,
     kitchen_router,
-    courier_router
+    courier_router,
+    callback_router
 )
 

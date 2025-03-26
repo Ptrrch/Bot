@@ -58,6 +58,17 @@ async def handle_start_client(message: types.Message, state: FSMContext):
     await message.answer(text="Укажи свое имя")
 
 
+@router.message(Command("cancel"))  # Сработает при команде /cancel
+@router.message(F.text.casefold() == "cancel") # И если в сообщение есть "cancel"
+async def cancel_handler(message: types.Message, state: FSMContext) -> None:
+    current_state = await state.get_state()  # Получаем текущий state
+    if current_state is None:  # Если его нет, то ничего не возвращаем
+        return
+    '''А вот иначе, завершаем state и прописываем в лог'''
+    await state.clear()
+    await message.answer(f"Вы отменили действие: {current_state}")
+
+
 @router.message(Admin.name, F.text)
 async def handle_client_user_full_name(message: types.Message, state: FSMContext):
     await state.update_data(name=message.text)

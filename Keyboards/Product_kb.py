@@ -51,3 +51,15 @@ def product_change_keyboard(id: int)-> InlineKeyboardMarkup:
         )
     )
     return builder.as_markup()
+
+
+def create_kitchen_for_product_keyboard(data: dict) ->InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    for item in data:
+        builder.row(InlineKeyboardButton(
+            text=item.title,
+            callback_data=f"add_kitchen_for_product_{item.id}"
+            )
+        )
+    builder.adjust(1)
+    return builder.as_markup()

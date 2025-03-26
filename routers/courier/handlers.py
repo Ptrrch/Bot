@@ -35,10 +35,23 @@ async def send_courier_result(message: types.Message, data: dict):
 
 
 
+
+
 @router.message(Command("courier", prefix="!/"))
 async def handle_start_kitchen(message: types.Message, state: FSMContext):
     await state.set_state(Courier.name)
     await message.answer(text="Укажите ваше имя")
+
+
+@router.message(Command("cancel"))  # Сработает при команде /cancel
+@router.message(F.text.casefold() == "cancel") # И если в сообщение есть "cancel"
+async def cancel_handler(message: types.Message, state: FSMContext) -> None:
+    current_state = await state.get_state()  # Получаем текущий state
+    if current_state is None:  # Если его нет, то ничего не возвращаем
+        return
+    '''А вот иначе, завершаем state и прописываем в лог'''
+    await state.clear()
+    await message.answer(f"Вы отменили действие: {current_state}")
 
 
 @router.message(Courier.name, F.text)
@@ -64,7 +77,7 @@ async def handle_kitchen_description(message: types.Message, state: FSMContext):
     
 
 @router.message(Courier.lastname)
-async def handle_kittchen_description_invalid_content_type(message: types.Message):
+async def handle_kitchen_description_invalid_content_type(message: types.Message):
     await message.answer(
         "Простите, я не понимаю, напишите текстом, пожалуйста"
     )

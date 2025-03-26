@@ -54,11 +54,12 @@ async def get_kitchen(session, id: int) -> Kitchen | None:
     return kitchen
 
 
-
-async def test() -> None:
-    # await create_kitchen({'tg_id': 1, 'title': "title", 'description': "description", 'number': "number"})
-    # await append_city_to_kitchen(1, 1)
-    pass
+@connection
+async def get_kitchens(session) -> list[Kitchen] | None:
+    kitchens = await session.scalars(
+        select(Kitchen)
+    )
+    return kitchens
 
 
 @connection

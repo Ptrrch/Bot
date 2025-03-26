@@ -25,7 +25,7 @@ async def create_db():
 
 
 async def main():
-    await drop_db()
+    # await drop_db()
     await create_db()
 
 
