@@ -11,6 +11,7 @@ class AdminActions(IntEnum):
     couriers = auto()
     clients = auto()
     orders = auto()
+    back = auto()
 
 
 class AdminCbData(CallbackData, prefix="admins"):
@@ -18,6 +19,7 @@ class AdminCbData(CallbackData, prefix="admins"):
 
 
 class AdminClientActions(IntEnum):
+
     details = auto()
 
 
@@ -27,6 +29,35 @@ class AdminClientCbData(CallbackData, prefix="admins_client"):
     name: str
     lastname: str
 
+
+class AdminCourierActions(IntEnum):
+    details = auto()
+
+
+class AdminCourierCbData(CallbackData, prefix="admins_courier"):
+    action: AdminCourierActions
+    user_id: int
+    name: str
+    lastname: str
+
+
+class AdminCitiesActions(IntEnum):
+    details = auto()
+
+
+class AdminCitiesCbData(CallbackData, prefix="admins_cities"):
+    action: AdminCitiesActions
+    id: int
+    title: str
+
+class AdminKitchensActions(IntEnum):
+    details = auto()
+
+
+class AdminKitchensCbData(CallbackData, prefix="admins_kitchens"):
+    action: AdminKitchensActions
+    user_id: int
+    title: str
 
 def create_admin_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
@@ -64,16 +95,10 @@ def create_admin_keyboard() -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
-
-
-from aiogram.types import InlineKeyboardButton
-from aiogram.utils.keyboard import InlineKeyboardBuilder
-
-
-def get_client_for_admin_keyboards(data: list):
+def get_client_for_admin_keyboards(data: list) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
-    # Проверяем, что data является списком и не пустой
+
     if isinstance(data, list) and data:
         for item in data:
             builder.row(
@@ -91,16 +116,114 @@ def get_client_for_admin_keyboards(data: list):
     builder.row(
         InlineKeyboardButton(
             text="Добавить клиента",
-            callback_data="add_city"  # Укажите подходящий callback_data
+            callback_data="add_city"
         ),
         InlineKeyboardButton(
             text="Назад",
-            callback_data="go_back"  # Укажите подходящий callback_data
+            callback_data=AdminCbData(
+                action=AdminActions.back,
+            ).pack()
         )
     )
 
     return builder.as_markup()
 
+
+def get_couriers_for_admin_keyboards(data: list) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+
+    if isinstance(data, list) and data:
+        for item in data:
+            builder.row(
+                InlineKeyboardButton(
+                    text=f'{item.name}',
+                    callback_data=AdminCourierCbData(
+                        action=AdminCourierActions.details,
+                        user_id=item.id,
+                        name=item.name,
+                        lastname=item.lastname
+                    ).pack()
+                )
+            )
+
+    builder.row(
+        InlineKeyboardButton(
+            text="Добавить курьера",
+            callback_data="add_city"
+        ),
+        InlineKeyboardButton(
+            text="Назад",
+            callback_data=AdminCbData(
+                action=AdminActions.back,
+            ).pack()
+        )
+    )
+
+    return builder.as_markup()
+
+
+def get_cities_for_admin_keyboards(data: list) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+
+    if isinstance(data, list) and data:
+        for item in data:
+            builder.row(
+                InlineKeyboardButton(
+                    text=f'{item.name}',
+                    callback_data=AdminCitiesCbData(
+                        action=AdminCitiesActions.details,
+                        id = item.id,
+                        title= item.title
+                    ).pack()
+                )
+            )
+
+    builder.row(
+        InlineKeyboardButton(
+            text="Добавить Город",
+            callback_data="add_city"
+        ),
+        InlineKeyboardButton(
+            text="Назад",
+            callback_data=AdminCbData(
+                action=AdminActions.back,
+            ).pack()
+        )
+    )
+
+    return builder.as_markup()
+
+
+def get_kitchens_for_admin_keyboards(data: list) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+
+    if isinstance(data, list) and data:
+        for item in data:
+            builder.row(
+                InlineKeyboardButton(
+                    text=f'{item.name}',
+                    callback_data=AdminKitchensCbData(
+                        action=AdminKitchensActions.details,
+                        user_id = item.user_id,
+                        title= item.title
+                    ).pack()
+                )
+            )
+
+    builder.row(
+        InlineKeyboardButton(
+            text="Добавить Кухню",
+            callback_data="add_city"
+        ),
+        InlineKeyboardButton(
+            text="Назад",
+            callback_data=AdminCbData(
+                action=AdminActions.back,
+            ).pack()
+        )
+    )
+
+    return builder.as_markup()
 
 
 

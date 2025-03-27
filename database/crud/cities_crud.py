@@ -25,11 +25,11 @@ async def create_city(session, data: dict):
         # await session.rollback()
 
 @connection
-async def get_city(session) -> City|None:
+async def get_city(session) -> list[City]|None:
     try:
-        city = await session.scalars(select(City))
-        if city:
-            return city
+        cities = await session.scalars(select(City))
+        if cities:
+            return cities
         else:
             logger.info("В базе данных пока еще нет городов")
     except SQLAlchemyError as e:

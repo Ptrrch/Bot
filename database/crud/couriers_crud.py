@@ -49,6 +49,8 @@ async def append_courier_to_city(session, tg_id: int, city_id: int) -> None:
     await session.commit()
 
 
-# @connection
-# async def
-
+@connection
+async def get_couriers(session) ->list[Courier]|None:
+    couriers = await session.scalars(select(Courier))
+    if couriers:
+        return couriers
