@@ -1,35 +1,57 @@
+from enum import IntEnum, auto
 
+from aiogram.filters.callback_data import CallbackData
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from Keyboards.Admin_kb import AdminCbData, AdminActions
 
-def create_kitchen_keyboard(data: dict) ->InlineKeyboardMarkup:
+
+class KitchenActions(IntEnum):
+    delete = auto()
+    update = auto()
+    product = auto()
+
+
+class KitchenItemCbData(CallbackData, prefix="kitchen"):
+    action: KitchenActions
+    id: int
+    title: str
+
+
+
+def create_kitchen_keyboard(kitchen_id: int, kitchen_title: str) ->InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
-    for item in data:
-        builder.row(InlineKeyboardButton(
-            text=item.title,
-            callback_data=f"get_kitchen_item_{item.id}"
-            )
-        )
     builder.row(
         InlineKeyboardButton(
-            text='➕ Добавить Кухню',
-            callback_data='create_new_kitchen'
+            text='Изменить',
+            callback_data=KitchenItemCbData(
+                action=KitchenActions.update,
+                title=kitchen_title,
+                id=kitchen_id
+            ).pack()
         )
     )
     builder.row(
         InlineKeyboardButton(
-            text='🔄 Обновить',
-            callback_data='refresh_kitchen'
+            text="Удалить",
+            callback_data=KitchenItemCbData(
+                action=KitchenActions.delete,
+                title=kitchen_title,
+                id=kitchen_id
+            ).pack()
         )
     )
     builder.row(
         InlineKeyboardButton(
-            text='👋 Назад',
-            callback_data='back_home'
+            text="Назад",
+            callback_data=AdminCbData(
+                action=AdminActions.kitchens,
+            ).pack()
         )
     )
-    builder.adjust(1)
+
+    builder.adjust(2)
     return builder.as_markup()
 
 

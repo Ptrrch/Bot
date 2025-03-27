@@ -4,7 +4,7 @@ from aiogram import Router, types, F
 from aiogram.filters import CommandStart, Command
 from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InputMediaPhoto
 
-from Keyboards.City_kb import create_city_keyboard, city_change_keyboard
+from Keyboards.City_kb import  city_change_keyboard
 from Keyboards.Client_kb import create_kitchen_for_client_keyboard, create_product_from_kitchen_keyboard, \
     interface_from_item
 from database.crud.cities_crud import get_city, get_one_city, delete_city

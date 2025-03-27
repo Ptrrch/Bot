@@ -1,36 +1,56 @@
+from enum import IntEnum, auto
 
+from aiogram.filters.callback_data import CallbackData
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from Keyboards.Admin_kb import AdminCbData, AdminActions
 
-def create_city_keyboard(data: dict) ->InlineKeyboardMarkup:
+
+class CitiesActions(IntEnum):
+    delete = auto()
+    update = auto()
+
+
+class CitiesItemCbData(CallbackData, prefix="cities"):
+    action: CitiesActions
+    id: int
+    title: str
+
+
+def create_cities_keyboard(city_id: int, city_title: str) ->InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
-    if data is not None:
-        for item in data:
-            builder.row(InlineKeyboardButton(
-                text=item.title,
-                callback_data=f"get_city_item_{item.id}"
-                )
-            )
     builder.row(
         InlineKeyboardButton(
-            text='➕ Добавить город',
-            callback_data='create_new_city'
+            text='Изменить',
+            callback_data=CitiesItemCbData(
+                action=CitiesActions.update,
+                id = city_id,
+                title=city_title
+
+            ).pack()
         )
     )
     builder.row(
         InlineKeyboardButton(
-            text='🔄 Обновить',
-            callback_data='refresh_city'
+            text="Удалить",
+            callback_data=CitiesItemCbData(
+                action=CitiesActions.delete,
+                id=city_id,
+                title=city_title
+            ).pack()
         )
     )
     builder.row(
         InlineKeyboardButton(
-            text='👋 Назад',
-            callback_data='back_home'
+            text="Назад",
+            callback_data=AdminCbData(
+                action=AdminActions.cities,
+            ).pack()
         )
     )
-    builder.adjust(1)
+
+    builder.adjust(2)
     return builder.as_markup()
 
 

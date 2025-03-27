@@ -14,13 +14,14 @@ from .callback_handlers import router as callback_router
 router = Router(name=__name__)
 
 router.include_routers(
+callback_router,
     commands_router,
     client_router,
     admin_router,
     city_router,
     product_router,
     kitchen_router,
-    courier_router,
-    callback_router
+    courier_router
+
 )
 

@@ -7,3 +7,12 @@ class Kitchen(StatesGroup):
     number = State()
     address = State()
     city_id = State()
+
+
+class UpdateKitchen(StatesGroup):
+    id = State()
+    title = State()
+    description = State()
+    number = State()
+    address = State()
+    city_id = State()

@@ -19,7 +19,6 @@ class AdminCbData(CallbackData, prefix="admins"):
 
 
 class AdminClientActions(IntEnum):
-
     details = auto()
 
 
@@ -43,20 +42,23 @@ class AdminCourierCbData(CallbackData, prefix="admins_courier"):
 
 class AdminCitiesActions(IntEnum):
     details = auto()
-
+    create = auto()
 
 class AdminCitiesCbData(CallbackData, prefix="admins_cities"):
     action: AdminCitiesActions
     id: int
     title: str
 
+
+
 class AdminKitchensActions(IntEnum):
     details = auto()
+    create = auto()
 
 
 class AdminKitchensCbData(CallbackData, prefix="admins_kitchens"):
     action: AdminKitchensActions
-    user_id: int
+    id: int
     title: str
 
 def create_admin_keyboard() -> InlineKeyboardMarkup:
@@ -99,19 +101,19 @@ def get_client_for_admin_keyboards(data: list) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
 
-    if isinstance(data, list) and data:
-        for item in data:
-            builder.row(
-                InlineKeyboardButton(
-                    text=f'{item.name}',
-                    callback_data=AdminClientCbData(
-                        action=AdminClientActions.details,
-                        user_id=item.id,
-                        name=item.name,
-                        lastname=item.lastname
-                    ).pack()
-                )
+
+    for item in data:
+        builder.row(
+            InlineKeyboardButton(
+                text=f'{item.name}',
+                callback_data=AdminClientCbData(
+                    action=AdminClientActions.details,
+                    user_id=item.id,
+                    name=item.name,
+                    lastname=item.lastname
+                ).pack()
             )
+        )
 
     builder.row(
         InlineKeyboardButton(
@@ -165,23 +167,27 @@ def get_couriers_for_admin_keyboards(data: list) -> InlineKeyboardMarkup:
 def get_cities_for_admin_keyboards(data: list) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
-    if isinstance(data, list) and data:
-        for item in data:
-            builder.row(
-                InlineKeyboardButton(
-                    text=f'{item.name}',
-                    callback_data=AdminCitiesCbData(
-                        action=AdminCitiesActions.details,
-                        id = item.id,
-                        title= item.title
-                    ).pack()
-                )
+
+    for item in data:
+        builder.row(
+            InlineKeyboardButton(
+                text=f'{item.title}',
+                callback_data=AdminCitiesCbData(
+                    action=AdminCitiesActions.details,
+                    id = item.id,
+                    title= item.title
+                ).pack()
             )
+        )
 
     builder.row(
         InlineKeyboardButton(
             text="Добавить Город",
-            callback_data="add_city"
+            callback_data=AdminCitiesCbData(
+                action=AdminCitiesActions.create,
+                id = 0,
+                title=""
+            ).pack()
         ),
         InlineKeyboardButton(
             text="Назад",
@@ -197,23 +203,27 @@ def get_cities_for_admin_keyboards(data: list) -> InlineKeyboardMarkup:
 def get_kitchens_for_admin_keyboards(data: list) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
-    if isinstance(data, list) and data:
-        for item in data:
-            builder.row(
-                InlineKeyboardButton(
-                    text=f'{item.name}',
-                    callback_data=AdminKitchensCbData(
-                        action=AdminKitchensActions.details,
-                        user_id = item.user_id,
-                        title= item.title
-                    ).pack()
-                )
+
+    for item in data:
+        builder.row(
+            InlineKeyboardButton(
+                text=f'{item.title}',
+                callback_data=AdminKitchensCbData(
+                    action=AdminKitchensActions.details,
+                    id = item.id,
+                    title= item.title
+                ).pack()
             )
+        )
 
     builder.row(
         InlineKeyboardButton(
             text="Добавить Кухню",
-            callback_data="add_city"
+            callback_data=AdminKitchensCbData(
+                action=AdminKitchensActions.create,
+                id=0,
+                title=""
+            ).pack()
         ),
         InlineKeyboardButton(
             text="Назад",

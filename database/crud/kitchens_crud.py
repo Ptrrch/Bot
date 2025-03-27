@@ -63,10 +63,9 @@ async def get_kitchens(session) -> list[Kitchen] | None:
 
 
 @connection
-async def update_kitchen(session, tg_id: id, data: dict) -> None:
-    kitchen = await session.scalar(select(Kitchen).where(Kitchen.user_id == tg_id))
+async def update_kitchen(session, data: dict) -> None:
+    kitchen = await session.scalar(select(Kitchen).where(Kitchen.id == data['id']))
     if kitchen:
-        kitchen.user_id=data['tg_id']
         kitchen.title=data['title']
         kitchen.description=data['description']
         kitchen.address=data['address']
@@ -75,8 +74,8 @@ async def update_kitchen(session, tg_id: id, data: dict) -> None:
 
 
 @connection
-async def delete_kitchen(session, tg_id: int) -> None:
-    data = await session.scalar(select(Kitchen).where(Kitchen.user_id==tg_id))
+async def delete_kitchen(session, id: int) -> None:
+    data = await session.scalar(select(Kitchen).where(Kitchen.id==id))
     if data:
         await session.delete(data)
         await session.commit()
