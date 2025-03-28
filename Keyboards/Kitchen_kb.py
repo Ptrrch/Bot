@@ -44,6 +44,16 @@ def create_kitchen_keyboard(kitchen_id: int, kitchen_title: str) ->InlineKeyboar
     )
     builder.row(
         InlineKeyboardButton(
+            text="Продукты",
+            callback_data=KitchenItemCbData(
+                action=KitchenActions.product,
+                title=kitchen_title,
+                id=kitchen_id
+            ).pack()
+        )
+    )
+    builder.row(
+        InlineKeyboardButton(
             text="Назад",
             callback_data=AdminCbData(
                 action=AdminActions.kitchens,

@@ -54,6 +54,8 @@ async def get_kitchen(session, id: int) -> Kitchen | None:
     return kitchen
 
 
+
+
 @connection
 async def get_kitchens(session) -> list[Kitchen] | None:
     kitchens = await session.scalars(

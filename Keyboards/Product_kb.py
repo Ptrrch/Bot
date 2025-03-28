@@ -1,31 +1,57 @@
+from enum import IntEnum, auto
+
+from aiogram.filters.callback_data import CallbackData
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from Keyboards.Admin_kb import AdminKitchensActions, AdminKitchensCbData
+from database.crud.product_crud import get_products
 
-def create_product_keyboard(data: dict) -> InlineKeyboardMarkup:
+
+class ProductActions(IntEnum):
+    details = auto()
+    create = auto()
+    delete = auto()
+    update = auto()
+    back = auto()
+
+
+class ProductCbData(CallbackData, prefix="product_from_kitchens"):
+    action: ProductActions
+    id: int
+    title: str
+
+def create_product_keyboard(kitchen_id:int, kitchen_title:str, data: dict) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
-    for item in data:
-        builder.row(InlineKeyboardButton(
-            text=item.title,
-            callback_data=f"get_product_item_{item.id}"
+    if data is not None:
+        for item in data:
+            builder.row(InlineKeyboardButton(
+                text=item.title,
+                callback_data=ProductCbData(
+                    action=ProductActions.details,
+                    id = item.id,
+                    title=item.title
+                ).pack()
+                )
             )
-        )
     builder.row(
         InlineKeyboardButton(
             text='➕ Добавить позицию',
-            callback_data='create_new_product'
-        )
-    )
-    builder.row(
-        InlineKeyboardButton(
-            text='🔄 Обновить',
-            callback_data='refresh_product'
+            callback_data=ProductCbData(
+                action=ProductActions.create,
+                id=kitchen_id,
+                title=kitchen_title
+            ).pack()
         )
     )
     builder.row(
         InlineKeyboardButton(
             text='👋 Назад',
-            callback_data='back_home'
+            callback_data=AdminKitchensCbData(
+                action=AdminKitchensActions.details,
+                id=kitchen_id,
+                title=kitchen_title
+            ).pack()
         )
     )
     builder.adjust(1)
@@ -37,17 +63,29 @@ def product_change_keyboard(id: int)-> InlineKeyboardMarkup:
     builder.row(
         InlineKeyboardButton(
             text="Удалить",
-            callback_data=f"delete_product_{id}"
+            callback_data=ProductCbData(
+                action=ProductActions.delete,
+                id=id,
+                title=""
+            ).pack()
         ),
         InlineKeyboardButton(
             text="Изменить",
-            callback_data=f"change_product_{id}"
+            callback_data=ProductCbData(
+                action=ProductActions.update,
+                id=id,
+                title=""
+            ).pack()
         )
     )
     builder.row(
         InlineKeyboardButton(
             text="Назад",
-            callback_data=f"get_product"
+            callback_data=ProductCbData(
+                action=ProductActions.back,
+                id=0,
+                title=""
+            ).pack()
         )
     )
     return builder.as_markup()

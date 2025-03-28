@@ -6,7 +6,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.utils import markdown
 
-from Keyboards.Product_kb import create_kitchen_for_product_keyboard
+from Keyboards.Product_kb import create_kitchen_for_product_keyboard, ProductCbData, ProductActions
 from database.crud.kitchens_crud import get_kitchens
 from database.crud.product_crud import create_product, update_product
 
@@ -31,13 +31,13 @@ async def send_product_result(message: types.Message, data: dict):
     await create_product(data)
 
 
-@router.callback_query(F.data.startswith('create_new_product'), default_state)
-@router.message(Command("product", prefix="!/"), default_state)
-async def handle_start_client(call: CallbackQuery, state: FSMContext):
+@router.callback_query(ProductCbData.filter(F.action == ProductActions.create))
+async def handle_start_client(call: CallbackQuery, callback_data:ProductCbData, state: FSMContext):
     await call.answer()
     await state.set_state(Product.owned_id)
-    data = await get_kitchens()
-    await call.message.answer(text="Укажите номер владельца позиции", reply_markup=create_kitchen_for_product_keyboard(data))
+    await state.update_data(owned_id=callback_data.id)
+    await state.set_state(Product.title)
+    await call.message.answer(text="Укажите наименование позиции")
 
 
 @router.message(Command("cancel"))  # Сработает при команде /cancel
@@ -51,15 +51,15 @@ async def cancel_handler(message: types.Message, state: FSMContext) -> None:
     await message.answer(f"Вы отменили действие: {current_state}")
 
 
-@router.callback_query(Product.owned_id, F.data.startswith('add_kitchen_for_product_'))
-async def handle_client_user_full_name(call: CallbackQuery, state: FSMContext):
-    await call.answer()
-    kitchen_id = int(call.data.replace('add_kitchen_for_product_', ''))
-    await state.update_data(owned_id=kitchen_id)
-    await state.set_state(Product.title)
-    await call.message.answer(
-       text = "Укажите наименование позиции"
-    )
+# @router.callback_query(Product.owned_id, F.data.startswith('add_kitchen_for_product_'))
+# async def handle_client_user_full_name(call: CallbackQuery, state: FSMContext):
+#     await call.answer()
+#     kitchen_id = int(call.data.replace('add_kitchen_for_product_', ''))
+#     await state.update_data(owned_id=kitchen_id)
+#     await state.set_state(Product.title)
+#     await call.message.answer(
+#        text = "Укажите наименование позиции"
+#     )
 
 
 @router.message(Product.title, F.text)
@@ -115,13 +115,12 @@ async def handle_client_user_number_invalid_content_type(message: types.Message)
     )
 
 
-@router.callback_query(F.data.startswith('change_product_'))
-async def change_product(call: CallbackQuery, state: FSMContext):
+@router.callback_query(ProductCbData.filter(F.action == ProductActions.update))
+async def change_product(call: CallbackQuery, callback_data:ProductCbData, state: FSMContext):
     await call.answer()
     await state.set_state(ChangeProduct.id)
-    
-    product_id = int(call.data.replace('change_product_', ''))
-    await state.update_data(id=product_id)
+
+    await state.update_data(id=callback_data.id)
     
     await state.set_state(ChangeProduct.title)
     await call.message.answer("Введите новое название")
