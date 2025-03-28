@@ -20,6 +20,7 @@ class AdminCbData(CallbackData, prefix="admins"):
 
 class AdminClientActions(IntEnum):
     details = auto()
+    create = auto()
 
 
 class AdminClientCbData(CallbackData, prefix="admins_client"):
@@ -31,13 +32,13 @@ class AdminClientCbData(CallbackData, prefix="admins_client"):
 
 class AdminCourierActions(IntEnum):
     details = auto()
+    create = auto()
 
 
 class AdminCourierCbData(CallbackData, prefix="admins_courier"):
     action: AdminCourierActions
     user_id: int
     name: str
-    lastname: str
 
 
 class AdminCitiesActions(IntEnum):
@@ -108,7 +109,7 @@ def get_client_for_admin_keyboards(data: list) -> InlineKeyboardMarkup:
                 text=f'{item.name}',
                 callback_data=AdminClientCbData(
                     action=AdminClientActions.details,
-                    user_id=item.id,
+                    user_id=item.user_id,
                     name=item.name,
                     lastname=item.lastname
                 ).pack()
@@ -118,7 +119,12 @@ def get_client_for_admin_keyboards(data: list) -> InlineKeyboardMarkup:
     builder.row(
         InlineKeyboardButton(
             text="Добавить клиента",
-            callback_data="add_city"
+            callback_data=AdminClientCbData(
+                action=AdminClientActions.create,
+                user_id=0,
+                name="",
+                lastname=""
+            ).pack()
         ),
         InlineKeyboardButton(
             text="Назад",
@@ -134,16 +140,15 @@ def get_client_for_admin_keyboards(data: list) -> InlineKeyboardMarkup:
 def get_couriers_for_admin_keyboards(data: list) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
-    if isinstance(data, list) and data:
+    if data is not None:
         for item in data:
             builder.row(
                 InlineKeyboardButton(
                     text=f'{item.name}',
                     callback_data=AdminCourierCbData(
                         action=AdminCourierActions.details,
-                        user_id=item.id,
+                        user_id=item.user_id,
                         name=item.name,
-                        lastname=item.lastname
                     ).pack()
                 )
             )
@@ -151,8 +156,12 @@ def get_couriers_for_admin_keyboards(data: list) -> InlineKeyboardMarkup:
     builder.row(
         InlineKeyboardButton(
             text="Добавить курьера",
-            callback_data="add_city"
-        ),
+            callback_data=AdminCourierCbData(
+                action=AdminCourierActions.create,
+                user_id=0,
+                name=""
+                ).pack()
+            ),
         InlineKeyboardButton(
             text="Назад",
             callback_data=AdminCbData(

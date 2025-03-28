@@ -32,11 +32,10 @@ async def create_client(session, data: dict, tg_id: int) -> Optional[Client]:
 
 @connection
 async def get_client(session, tg_id: int):
-    result = await session.execute(
+    client = await session.scalar(
         select(Client).where(Client.user_id == tg_id)
     )
 
-    client = result.scalars()
     return client
 
 @connection
@@ -47,7 +46,7 @@ async def get_clients(session):
 
 @connection
 async def update_client(session, data: dict):
-    client = await session.scalar(select(Client).where(Client.id == data['tg_id']))
+    client = await session.scalar(select(Client).where(Client.user_id == data['user_id']))
     if client:
         client.name = data['name']
         client.lastname = data['lastname']

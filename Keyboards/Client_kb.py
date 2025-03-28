@@ -1,8 +1,67 @@
+from enum import IntEnum, auto
+
+from aiogram.filters.callback_data import CallbackData
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from Keyboards.Admin_kb import AdminClientCbData, AdminClientActions, AdminActions, AdminCbData
 
 
+class ClientActions(IntEnum):
+    delete = auto()
+    update = auto()
+    orders = auto()
+    back = auto()
+
+
+
+class ClientCbData(CallbackData, prefix="client_details"):
+    action: ClientActions
+    id: int
+    name: str
+
+
+def create_client_interface(id:int, name:str, lastname: str):
+    builder = InlineKeyboardBuilder()
+    builder.row(
+        InlineKeyboardButton(
+            text="Заказы",
+            callback_data=ClientCbData(
+                action=ClientActions.orders,
+                id=id,
+                name=name
+            ).pack()
+        )
+    )
+    builder.row(
+        InlineKeyboardButton(
+            text="Удалить",
+            callback_data=ClientCbData(
+                action=ClientActions.delete,
+                id=id,
+                name=name
+            ).pack()
+        ),
+        InlineKeyboardButton(
+            text="Изменить",
+            callback_data=ClientCbData(
+                action=ClientActions.update,
+                id=id,
+                name=name
+            ).pack()
+        )
+    )
+    builder.row(
+        InlineKeyboardButton(
+            text="Назад",
+            callback_data=AdminCbData(
+                action=AdminActions.clients,
+            ).pack()
+        )
+    )
+
+
+    return builder.as_markup()
 
 
 

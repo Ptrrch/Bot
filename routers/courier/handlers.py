@@ -5,14 +5,15 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.utils import markdown
 
-from Keyboards.Courier_kb import create_city_for_courier_keyboard
+from Keyboards.Admin_kb import AdminCourierCbData, AdminCourierActions
+from Keyboards.Courier_kb import create_city_for_courier_keyboard, CourierActions, CourierItemCbData
 from Keyboards.Kitchen_kb import create_city_for_kitchen_keyboard
 from database.crud.cities_crud import get_city, get_one_city
 from database.crud.clients_crud import create_client
-from database.crud.couriers_crud import create_courier
+from database.crud.couriers_crud import create_courier, update_courier
 from database.crud.kitchens_crud import create_kitchen
 
-from .states import Courier
+from .states import Courier, UpdateCourier
 
 router = Router(name=__name__)
 
@@ -21,7 +22,7 @@ router = Router(name=__name__)
 async def send_courier_result(message: types.Message, data: dict):
     city = await get_one_city(data['city_id'])
     text = markdown.text(
-        "Так выглядит ваш профиль:",
+        "Так выглядит профиль:",
         "",
         markdown.text("Имя: ", markdown.hbold(data['name'])),
         markdown.text("Фамилия: ", markdown.hbold(data['lastname'])),
@@ -31,16 +32,35 @@ async def send_courier_result(message: types.Message, data: dict):
     )
 
     await message.answer(text=text, parse_mode=ParseMode.HTML)
-    await create_courier(data, message.from_user.id)
+    await create_courier(data)
+
+async def send_update_courier_result(message: types.Message, data: dict):
+    city = await get_one_city(data['city_id'])
+    text = markdown.text(
+        "Так теперь выглядит профиль:",
+        "",
+        markdown.text("Имя: ", markdown.hbold(data['name'])),
+        markdown.text("Фамилия: ", markdown.hbold(data['lastname'])),
+        markdown.text("Город: ", markdown.hbold(city.title)),
+        markdown.text("Номер телефона: ", markdown.hbold(data['number'])),
+        sep="\n"
+    )
+
+    await message.answer(text=text, parse_mode=ParseMode.HTML)
+    await update_courier(data)
 
 
 
 
 
-@router.message(Command("courier", prefix="!/"))
-async def handle_start_kitchen(message: types.Message, state: FSMContext):
+@router.callback_query(
+    AdminCourierCbData.filter(F.action == AdminCourierActions.create)
+)
+async def handle_start_kitchen(call: CallbackQuery, callback_data: AdminCourierCbData, state: FSMContext):
+    await state.set_state(Courier.user_id)
+    await state.update_data(user_id=callback_data.user_id)
     await state.set_state(Courier.name)
-    await message.answer(text="Укажите ваше имя")
+    await call.message.answer(text="Укажите ваше имя")
 
 
 @router.message(Command("cancel"))  # Сработает при команде /cancel
@@ -109,6 +129,87 @@ async def handle_kitchen_number(message: types.Message, state: FSMContext):
     
 
 @router.message(Courier.number)
+async def handle_kitchen_number_invalid_content_type(message: types.Message):
+    await message.answer(
+        "Простите, я не понимаю, напишите текстом, пожалуйста"
+    )
+
+
+@router.callback_query(
+    CourierItemCbData.filter(F.action == CourierActions.update)
+)
+async def handle_start_kitchen(call: CallbackQuery, callback_data: CourierItemCbData, state: FSMContext):
+    await state.set_state(UpdateCourier.user_id)
+    await state.update_data(user_id=callback_data.id)
+    await state.set_state(UpdateCourier.name)
+    await call.message.answer(text="Укажите новое имя")
+
+
+@router.message(Command("cancel"))  # Сработает при команде /cancel
+@router.message(F.text.casefold() == "cancel")  # И если в сообщение есть "cancel"
+async def cancel_handler(message: types.Message, state: FSMContext) -> None:
+    current_state = await state.get_state()  # Получаем текущий state
+    if current_state is None:  # Если его нет, то ничего не возвращаем
+        return
+    '''А вот иначе, завершаем state и прописываем в лог'''
+    await state.clear()
+    await message.answer(f"Вы отменили действие: {current_state}")
+
+
+@router.message(UpdateCourier.name, F.text)
+async def handle_kitchen_title(message: types.Message, state: FSMContext):
+    await state.update_data(name=message.text)
+    await state.set_state(UpdateCourier.lastname)
+    await message.answer("Укажите вашу фамилию")
+
+
+@router.message(UpdateCourier.name)
+async def handle_kitchen_title_invalid_content_type(message: types.Message):
+    await message.answer(
+        "Простите, я не понимаю, напишите текстом, пожалуйста"
+    )
+
+
+@router.message(UpdateCourier.lastname, F.text)
+async def handle_kitchen_description(message: types.Message, state: FSMContext):
+    await state.update_data(lastname=message.text)
+    await state.set_state(UpdateCourier.city_id)
+    city = await get_city()
+    await message.answer("Выберите город", reply_markup=create_city_for_courier_keyboard(city))
+
+
+@router.message(UpdateCourier.lastname)
+async def handle_kitchen_description_invalid_content_type(message: types.Message):
+    await message.answer(
+        "Простите, я не понимаю, напишите текстом, пожалуйста"
+    )
+
+
+@router.callback_query(UpdateCourier.city_id, F.data.startswith('add_city_for_courier_'))
+async def handle_kitchen_city_id(call: CallbackQuery, state: FSMContext):
+    await call.answer()
+    city_id = int(call.data.replace('add_city_for_courier_', ''))
+    await state.update_data(city_id=city_id)
+    await state.set_state(UpdateCourier.number)
+    await call.message.answer(
+        "Укажите ваш номер"
+    )
+
+
+@router.message(UpdateCourier.city_id)
+async def handle_kitchen_city_id_invalid_content_type(call: CallbackQuery, state: FSMContext):
+    await call.answer()
+    await call.message.answer("Выберите город из списка")
+
+
+@router.message(UpdateCourier.number, F.text)
+async def handle_kitchen_number(message: types.Message, state: FSMContext):
+    data = await state.update_data(number=message.text)
+    await state.clear()
+    await send_update_courier_result(message, data)
+
+
+@router.message(UpdateCourier.number)
 async def handle_kitchen_number_invalid_content_type(message: types.Message):
     await message.answer(
         "Простите, я не понимаю, напишите текстом, пожалуйста"

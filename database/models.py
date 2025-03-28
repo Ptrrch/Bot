@@ -31,6 +31,18 @@ class Base(DeclarativeBase):
     updated: Mapped[DateTime] = mapped_column(DateTime, default=func.now(), server_default=func.now(), onupdate=func.now())
 
 
+# class User(Base):
+#     __tablename__ = "kitchens"
+#
+#     id: Mapped[int] = mapped_column(Integer, primary_key=True)
+#     user_id: Mapped[int] = mapped_column(BigInteger, unique=True)
+#     title: Mapped[str] = mapped_column(String(30))
+#     description: Mapped[str] = mapped_column(Text)
+#     number: Mapped[str] = mapped_column(String(20), unique=True)
+#     address: Mapped[str] = mapped_column(String(30))
+#     city_id: Mapped[int] = mapped_column(ForeignKey('cities.id'), nullable=True)
+#     cities: Mapped["City"] = relationship(back_populates='kitchens')
+
 
 class Kitchen(Base):
     __tablename__ = "kitchens"
