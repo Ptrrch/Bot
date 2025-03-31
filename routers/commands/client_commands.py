@@ -7,6 +7,7 @@ from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InputMediaPhoto
 from Keyboards.City_kb import  city_change_keyboard
 from Keyboards.Client_kb import create_kitchen_for_client_keyboard, create_product_from_kitchen_keyboard, \
     interface_from_item
+from Keyboards.Menu_kb import create_kitchen_menu
 from database.crud.cities_crud import get_city, get_one_city, delete_city
 from database.crud.kitchens_crud import get_kitchen, get_kitchens
 from database.crud.product_crud import get_products, get_one_product
@@ -14,16 +15,12 @@ from database.crud.product_crud import get_products, get_one_product
 router = Router(name=__name__)
 
 
-@router.message(F.text == '📚 Каталог заведений')
-async def get_kitchen_table(message: types.Message) ->None:
-    data = await get_kitchens()
-    await message.answer(text="Список Заведений: ", reply_markup=create_kitchen_for_client_keyboard(data))
 
 
-@router.callback_query(F.data.startswith('get_kitchen_list'))
-async def back_to_kitchen_list(call: CallbackQuery):
-    data = await get_kitchens()
-    await call.message.edit_text(text="Список Заведений: ", reply_markup=create_kitchen_for_client_keyboard(data))
+# @router.callback_query(F.data.startswith('get_kitchen_list'))
+# async def back_to_kitchen_list(call: CallbackQuery):
+#     data = await get_kitchens()
+#     await call.message.edit_text(text="Список Заведений: ", reply_markup=create_kitchen_for_client_keyboard(data))
 
 
 @router.callback_query(F.data.startswith('get_kitchen_for_client_item_'))

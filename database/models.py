@@ -1,4 +1,5 @@
 import enum
+from enum import StrEnum
 from typing import List
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy import ARRAY, BigInteger, DateTime, Float, ForeignKey, Integer, Text, String, UniqueConstraint, func
@@ -12,6 +13,11 @@ class StateClient(str, enum.Enum):
     default = "Обычный"
     negative = "Низкий рейтинг"
     blackList = "Черный список"
+
+
+class UserForm(StrEnum):
+    agree = "Согласен"
+    disagree = "Несогласен"
 
 
 class StateOrder(str, enum.Enum):
@@ -31,17 +37,13 @@ class Base(DeclarativeBase):
     updated: Mapped[DateTime] = mapped_column(DateTime, default=func.now(), server_default=func.now(), onupdate=func.now())
 
 
-# class User(Base):
-#     __tablename__ = "kitchens"
-#
-#     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-#     user_id: Mapped[int] = mapped_column(BigInteger, unique=True)
-#     title: Mapped[str] = mapped_column(String(30))
-#     description: Mapped[str] = mapped_column(Text)
-#     number: Mapped[str] = mapped_column(String(20), unique=True)
-#     address: Mapped[str] = mapped_column(String(30))
-#     city_id: Mapped[int] = mapped_column(ForeignKey('cities.id'), nullable=True)
-#     cities: Mapped["City"] = relationship(back_populates='kitchens')
+class User(Base):
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(BigInteger, unique=True)
+    state: Mapped[StateClient] = mapped_column(default=StateClient.default, server_default=StateClient.default)
+    form: Mapped[UserForm] = mapped_column(default=UserForm.disagree, server_default=UserForm.disagree)
 
 
 class Kitchen(Base):

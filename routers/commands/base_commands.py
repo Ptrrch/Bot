@@ -4,6 +4,7 @@ from aiogram.filters import CommandStart, Command
 from Keyboards.Base_kb import main_kb
 from database.crud.admins_crud import get_admin, delete_admin
 from database.crud.clients_crud import get_client
+from database.crud.user_crud import create_user, get_user_id
 
 router = Router(name=__name__)
 
@@ -11,6 +12,13 @@ router = Router(name=__name__)
 @router.message(CommandStart())
 async def start_message(message: types.Message):
     await message.answer(text="Holla, i'm demo-Bot", reply_markup=main_kb())
+    await create_user(message.from_user.id)
+
+@router.message(Command("id", prefix="!/"))
+async def start_message(message: types.Message):
+    idx = await get_user_id(message.from_user.id)
+    await message.answer(text=f"Ваш id: {idx}", reply_markup=main_kb())
+
 
 
 @router.message(Command("help", prefix="!/"))

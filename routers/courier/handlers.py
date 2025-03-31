@@ -12,6 +12,7 @@ from database.crud.cities_crud import get_city, get_one_city
 from database.crud.clients_crud import create_client
 from database.crud.couriers_crud import create_courier, update_courier
 from database.crud.kitchens_crud import create_kitchen
+from database.crud.user_crud import get_user_tg_id
 
 from .states import Courier, UpdateCourier
 
@@ -58,9 +59,7 @@ async def send_update_courier_result(message: types.Message, data: dict):
 )
 async def handle_start_kitchen(call: CallbackQuery, callback_data: AdminCourierCbData, state: FSMContext):
     await state.set_state(Courier.user_id)
-    await state.update_data(user_id=callback_data.user_id)
-    await state.set_state(Courier.name)
-    await call.message.answer(text="Укажите ваше имя")
+    await call.message.answer(text="Укажите id пользователя")
 
 
 @router.message(Command("cancel"))  # Сработает при команде /cancel
@@ -74,11 +73,20 @@ async def cancel_handler(message: types.Message, state: FSMContext) -> None:
     await message.answer(f"Вы отменили действие: {current_state}")
 
 
+@router.message(Courier.user_id, F.text)
+async def handle_kitchen_title(message: types.Message, state: FSMContext):
+    idx = await get_user_tg_id(message.text)
+    await state.update_data(user_id=idx)
+    await state.set_state(Courier.name)
+    await message.answer("Укажите имя")
+
+
+
 @router.message(Courier.name, F.text)
 async def handle_kitchen_title(message: types.Message, state: FSMContext):
     await state.update_data(name=message.text)
     await state.set_state(Courier.lastname)
-    await message.answer("Укажите вашу фамилию")
+    await message.answer("Укажите фамилию")
 
 
 @router.message(Courier.name)
@@ -110,7 +118,7 @@ async def handle_kitchen_city_id(call: CallbackQuery, state: FSMContext):
     await state.update_data(city_id = city_id)
     await state.set_state(Courier.number)
     await call.message.answer(
-        "Укажите ваш номер"
+        "Укажите номер"
     )
 
 @router.message(Courier.city_id)

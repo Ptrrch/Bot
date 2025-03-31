@@ -10,6 +10,7 @@ from Keyboards.Kitchen_kb import create_city_for_kitchen_keyboard, KitchenItemCb
 from database.crud.cities_crud import get_city, get_one_city
 from database.crud.clients_crud import create_client
 from database.crud.kitchens_crud import create_kitchen, update_kitchen
+from database.crud.user_crud import get_user_tg_id
 
 from .states import Kitchen, UpdateKitchen
 
@@ -31,7 +32,7 @@ async def send_kitchen_result(message: types.Message, data: dict):
     )
 
     await message.answer(text=text)
-    await create_kitchen(data, message.from_user.id)
+    await create_kitchen(data)
 
 async def send_update_kitchen_result(message: types.Message, data: dict):
     city = await get_one_city(data['city_id'])
@@ -52,8 +53,8 @@ async def send_update_kitchen_result(message: types.Message, data: dict):
 
 @router.callback_query(AdminKitchensCbData.filter(F.action == AdminKitchensActions.create))
 async def handle_start_kitchen(call: CallbackQuery, state: FSMContext):
-    await state.set_state(Kitchen.title)
-    await call.message.answer(text="Укажите название")
+    await state.set_state(Kitchen.user_id)
+    await call.message.answer(text="Укажите id пользователя")
 
 @router.message(Command("cancel"))  # Сработает при команде /cancel
 @router.message(F.text.casefold() == "cancel") # И если в сообщение есть "cancel"
@@ -65,12 +66,19 @@ async def cancel_handler(message: types.Message, state: FSMContext) -> None:
     await state.clear()
     await message.answer(f"Вы отменили действие: {current_state}")
 
+@router.message(Kitchen.user_id, F.text)
+async def handle_kitchen_title(message: types.Message, state: FSMContext):
+    idx = await get_user_tg_id(message.text)
+    await state.update_data(user_id=idx)
+    await state.set_state(Kitchen.title)
+    await message.answer("Укажите наименование заведения")
+
 
 @router.message(Kitchen.title, F.text)
 async def handle_kitchen_title(message: types.Message, state: FSMContext):
     await state.update_data(title=message.text)
     await state.set_state(Kitchen.description)
-    await message.answer("Укажите описание вашего заведения")
+    await message.answer("Укажите описание заведения")
 
 
 @router.message(Kitchen.title)
@@ -102,7 +110,7 @@ async def handle_kitchen_city_id(call: CallbackQuery, state: FSMContext):
     await state.update_data(city_id = id)
     await state.set_state(Kitchen.address)
     await call.message.answer(
-        "Укажите адрес вашего заведения"
+        "Укажите адрес заведения"
     )
 
 @router.message(Kitchen.city_id)
@@ -116,7 +124,7 @@ async def handle_kitchen_address(message: types.Message, state: FSMContext):
     await state.update_data(address=message.text)
     await state.set_state(Kitchen.number)
     await message.answer(
-        f"Укажите номер телефона вашего заедения в формате {markdown.underline("+79991234455")}"
+        f"Укажите номер телефона заведения в формате {markdown.underline("+79991234455")}"
     )
 
 

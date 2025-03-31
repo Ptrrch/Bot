@@ -9,11 +9,11 @@ from database.engine import connection
 from database.models import Kitchen, City
 #
 @connection
-async def create_kitchen(session, data: dict, tg_id:int) -> None:
-    kitchen = await session.scalar(select(Kitchen).where(Kitchen.user_id == tg_id))
+async def create_kitchen(session, data: dict) -> None:
+    kitchen = await session.scalar(select(Kitchen).where(Kitchen.user_id == data['user_id']))
     if not kitchen:
         kitchen = Kitchen(
-            user_id=tg_id,
+            user_id=data['user_id'],
             title=data['title'],
             description=data['description'],
             address=data['address'],

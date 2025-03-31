@@ -2,6 +2,7 @@ from aiogram.fsm.state import StatesGroup, State
 
 
 class Kitchen(StatesGroup):
+    user_id = State()
     title = State()
     description = State()
     number = State()
