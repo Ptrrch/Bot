@@ -2,6 +2,7 @@
 
 from aiogram import F, types, Router
 from aiogram.enums import ParseMode
+from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, InputMediaPhoto
 
 from Keyboards.Menu_kb import MenuFirstCbData, MenyFirstActions, create_kitchen_menu, create_product_menu, \
@@ -54,6 +55,13 @@ async def show_kitchen_menu(call: CallbackQuery, callback_data: MenuSecondCbData
     MenuThirdCbData.filter(F.action == MenyThirdActions.back)
 )
 async def delete_product_answer(call: CallbackQuery):
+    await call.message.delete()
+
+
+@router.callback_query(
+    MenuThirdCbData.filter(F.action == MenyThirdActions.append)
+)
+async def create_order_answer(call: CallbackQuery, callback_data: MenuThirdCbData, state: FSMContext):
     await call.message.delete()
 
 

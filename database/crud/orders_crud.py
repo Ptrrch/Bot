@@ -8,19 +8,18 @@ from database.models import Order, OrderProductAssociation
 
 
 @connection
-async def create_order(session, data: dict) -> Order | None:
+async def create_order(session) -> Order | None:
     order = await session.scalar(
         select(Order)
         .options(selectinload(Order.products_details))
-        .where(Order.id == data['id'])
     )
 
-    if not order:
+    if order:
         new_order = Order(
         )
         session.add(new_order)
         await session.commit()
-        return new_order
+        return new_order, new_order.id
 
 
 async def get_orders_with_products_assoc(session: AsyncSession) -> list[Order]:
@@ -58,7 +57,7 @@ async def create_order_assoc(session):
     )
     second_product = await create_product(
         {'id': 3, 'owned_id': 2, 'title': "title3", 'description': "description", 'price': 250}
-    )
+    ) 
     await create_order({'id': '1'})
     await create_order({'id': '2'})
     await create_order({'id': '3'})

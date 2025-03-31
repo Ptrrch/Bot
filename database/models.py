@@ -2,7 +2,8 @@ import enum
 from enum import StrEnum
 from typing import List
 from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy import ARRAY, BigInteger, DateTime, Float, ForeignKey, Integer, Text, String, UniqueConstraint, func
+from sqlalchemy import ARRAY, BigInteger, DateTime, Float, ForeignKey, Integer, Text, String, UniqueConstraint, func, \
+    Boolean
 from sqlalchemy.orm import Mapped, relationship
 from sqlalchemy.orm import mapped_column
 from sqlalchemy import String
@@ -127,10 +128,7 @@ class Order(Base):
     client_id: Mapped[int] = mapped_column(ForeignKey("clients.id"), nullable=True)
     client: Mapped["Client"] = relationship("Client", back_populates="orders")
     delivery_time: Mapped[DateTime] = mapped_column(DateTime, default=func.now())
-    # products: Mapped[list["Product"]] = relationship(
-    #     secondary="order_product_association",
-    #     back_populates="orders",
-    # )
+    demo: Mapped[bool] = mapped_column(Boolean, default=False, server_default="False")
     products_details: Mapped[list["OrderProductAssociation"]] = relationship(
         back_populates="order"
     )

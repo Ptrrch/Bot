@@ -16,8 +16,9 @@ class MenuFirstCbData(CallbackData, prefix="menu_first"):
     kitchen_id: int
     kitchen_title: str
 
-class MenySecondActions(IntEnum):
+class MenuSecondActions(IntEnum):
     show = auto()
+    cart = auto()
     back = auto()
 
 class MenuSecondCbData(CallbackData, prefix="menu_second"):
@@ -136,7 +137,7 @@ def create_product_menu(data: list, kitchen_id: int) ->InlineKeyboardMarkup:
                 InlineKeyboardButton(
                     text=item.title,
                     callback_data=MenuSecondCbData(
-                        action=MenySecondActions.show,
+                        action=MenuSecondActions.show,
                         product_id=item.id,
                         kitchen_id=kitchen_id
                     ).pack()
@@ -146,7 +147,7 @@ def create_product_menu(data: list, kitchen_id: int) ->InlineKeyboardMarkup:
         InlineKeyboardButton(
             text="Назад",
             callback_data=MenuSecondCbData(
-                action=MenySecondActions.back,
+                action=MenuSecondActions.back,
                 product_id=0,
                 kitchen_id=0
             ).pack()
